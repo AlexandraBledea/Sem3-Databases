@@ -1,0 +1,95 @@
+USE LibraryManagement;
+drop table Location;
+drop table Borrowed;
+drop table Review;
+drop table Connection_Library_Book;
+drop table Subscription;
+drop table Connection_Library_Subscriber;
+drop table Staff_Member;
+drop table Book;
+drop table Subscriber;
+drop table Library;
+
+
+CREATE TABLE Library (
+	ID integer primary key,
+	Address varchar(30) not null,
+	Nr_Of_Books integer,
+	Capacity integer
+);
+
+CREATE TABLE Subscriber (
+	CNP char(13) primary key,
+	Name varchar(30) not null,
+	Age integer,
+	Nr_Of_Rented_Books integer
+);
+
+CREATE TABLE Book (
+	ID integer primary key,
+	Title varchar(30) not null,
+	Author varchar(30) not null,
+	Edition varchar(15),
+	Publisher varchar(30),
+	Description varchar(100)
+);
+
+CREATE TABLE Staff_Member (
+	CNP char(13) primary key,
+	Name varchar(30) not null,
+	Age integer,
+	Telephone integer,
+	Library_ID integer,
+	foreign key (Library_ID) references Library(ID) on delete cascade on update cascade
+);
+
+CREATE TABLE Connection_Library_Subscriber (
+	Library_ID integer,
+	CNP_Sub char(13),
+	foreign key (Library_ID) references Library(ID) on delete cascade on update cascade,
+	foreign key (CNP_Sub) references Subscriber(CNP) on delete cascade on update cascade,
+	constraint pk_connection_library_subscriber primary key (Library_ID, CNP_Sub)
+);
+
+CREATE TABLE Subscription (
+	ID integer primary key,
+	Price integer,
+	Availability BIT,
+	CNP_Sub char(13),
+	foreign key (CNP_Sub) references Subscriber(CNP) on delete cascade on update cascade
+);
+
+CREATE TABLE Connection_Library_Book (
+	Book_ID integer,
+	Library_ID integer,
+	foreign key (Book_ID) references Book(ID) on delete cascade on update cascade,
+	foreign key (Library_ID) references Library(ID) on delete cascade on update cascade,
+	constraint pk_connection_library_book primary key (Book_ID, Library_ID)
+);
+
+CREATE TABLE Review (
+	ID integer primary key,
+	Book_Title varchar(30),
+	Book_Author varchar(30),
+	Book_Edition varchar(15),
+	Ideea varchar(100),
+	Book_ID integer,
+	foreign key (Book_ID) references Book(ID) on delete cascade on update cascade
+);
+
+CREATE TABLE Borrowed (
+	ID integer primary key,
+	Issued_Date date,
+	Due_Date date,
+	Book_ID integer,
+	foreign key (Book_ID) references Book(ID) on delete cascade on update cascade
+);
+
+CREATE TABLE Location (
+	ID integer primary key,
+	Shelf_ID integer,
+	Row_Number integer,
+	Section_ID integer,
+	Book_ID integer,
+	foreign key (Book_ID) references Book(ID) on delete cascade on update cascade
+);

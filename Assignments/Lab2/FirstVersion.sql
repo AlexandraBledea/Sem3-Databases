@@ -1,0 +1,660 @@
+USE Library;
+drop table Location;
+drop table Review;
+drop table Critic;
+drop table Subscription;
+drop table Staff_Member;
+drop table Finished;
+drop table Subscriber;
+drop table Person;
+drop table Borrowed;
+drop table Book;
+drop table Library;
+
+
+CREATE TABLE Library (
+	ID integer not null primary key,
+	Address varchar(30) not null,
+	Nr_Of_Books integer,
+	Capacity integer
+);
+
+CREATE TABLE Book (
+	ID integer not null primary key,
+	Title varchar(100) not null,
+	Author varchar(30) not null,
+	Edition varchar(15),
+	Publisher varchar(30),
+	Category varchar(50),
+	Description varchar(100),
+	Popularity integer default 0
+);
+
+CREATE TABLE Borrowed (
+	Issued_Date date,
+	Due_Date date,
+	Book_ID integer not null,
+	Library_ID integer not null,
+	foreign key (Book_ID) references Book(ID) on delete cascade on update cascade,
+	foreign key (Library_ID) references Library(ID) on delete cascade on update cascade,
+	constraint pk_borrowed primary key (Book_ID, Library_ID)
+);
+
+CREATE TABLE Person (
+	CNP integer not null primary key,
+	Name varchar(30) not null,
+	Age integer
+);
+
+CREATE TABLE Subscriber (
+	CNP integer not null unique,
+	foreign key (CNP) references Person(CNP) on delete cascade on update cascade,
+	constraint pk_subscriber primary key (CNP),
+	Nr_Of_Rented_Books integer,
+	Favorite_Book varchar(100),
+	Favorite_Author varchar(30)
+);
+
+CREATE TABLE Finished(
+	Book_ID integer not null,
+	CNP_Sub integer not null,
+	Date_Finished DATE,
+	foreign key (CNP_Sub) references Subscriber(CNP) on delete cascade on update cascade,
+	foreign key (Book_ID) references Book(ID) on delete cascade on update cascade,
+	constraint pk_finished primary key(Book_ID, CNP_Sub)
+)
+
+CREATE TABLE Staff_Member (
+	CNP integer not null unique,
+	Telephone integer,
+	Library_ID integer not null,
+	Salary integer,
+	foreign key (Library_ID) references Library(ID) on delete cascade on update cascade,
+	foreign key (CNP) references Person(CNP) on delete cascade on update cascade,
+	constraint pk_staff_member primary key (CNP)
+);
+
+CREATE TABLE Subscription (
+	Library_ID integer not null,
+	CNP_Sub integer not null,
+	Price integer,
+	Availability BIT,
+	foreign key (Library_ID) references Library(ID) on delete cascade on update cascade,
+	foreign key (CNP_Sub) references Subscriber(CNP) on delete cascade on update cascade,
+	constraint pk_subscription primary key (Library_ID, CNP_Sub)
+);
+
+CREATE TABLE Critic (
+	CNP integer not null unique,
+	Nr_Of_Age_Working integer,
+	foreign key (CNP) references Person(CNP) on delete cascade on update cascade,
+	constraint pk_critic primary key (CNP)
+);
+
+CREATE TABLE Review (
+	Book_ID integer not null,
+	CNP integer not null,
+	Book_Title varchar(100) not null,
+	Book_Author varchar(30) not null,
+	Ideea varchar(100),
+	Grade integer,
+	foreign key (Book_ID) references Book(ID) on delete cascade on update cascade,
+	foreign key (CNP) references Critic(CNP) on delete cascade on update cascade,
+	constraint pk_review primary key (Book_ID, CNP)
+);
+
+CREATE TABLE Location (
+	ID integer not null primary key,
+	Shelf_ID integer,
+	Section_ID integer,
+	Book_ID integer not null unique,
+	foreign key (Book_ID) references Book(ID) on delete cascade on update cascade
+);
+
+
+/* INSERT STATEMENTS */
+-- at least one statement should violate referential integrity constraints -> first row
+-- insert into Review values(1,20,'Ana','Liviu Teodor', '1', 'lupta')
+
+
+--- populating the library table ---
+insert into Library VALUES(1,'Decembrie 1',3000,1005)
+insert into Library VALUES(2, 'Mihai Eminescu 2', 4000, 3012)
+insert into Library VALUES(3, 'Stefan cel Mare 43', 1000, 45)
+insert into Library VALUES(4, 'Alexandri 100', 3000, 3212)
+insert into Library VALUES(5, 'Mihai Viteazu 40', 100, 10)
+SELECT * from Library
+
+
+--- populating the books table ---
+insert into Book values(1, 'Harry Potter and the chamber of secrets', 'J. K. Rowling', '4', 'Corint Junior', 'Fiction', 'Full of magic!', 12)
+insert into Book values(2, 'Percy Jackson and the olympians', 'Rick Riordan', '3', 'Arthur', 'Battle', 'Gods', 13)
+insert into Book values(3, 'Eleanor & Park', 'Rainbow Rowell', '10', 'YoungArt', 'Romance', 'Romance and friendship', 20)
+insert into Book(ID, Title, Author, Edition, Publisher, Category) values(4, 'Balada Serpilor si a Pasarilor Cantatoare', 'Suzanne Collins','5', 'Armada', 'Battle')
+insert into Book(ID, Title, Author, Edition, Publisher, Category) values(5, 'Harry Potter and the Deathly Hallows', 'J. K. Rowling', '1', 'Arthur', 'Fiction')
+insert into Book(ID, Title, Author, Edition, Publisher, Category) values(6, 'Hunger Games 1', 'Suzanne Collins', '10', 'Armada', 'Battle')
+insert into Book(ID, Title, Author, Edition, Publisher, Category) values(7, 'Hobbit', 'J. R. R. Tolkien', '6', 'RAO', 'Battle')
+insert into Book values(8, 'Harry Potter and the prisoner of Azkaban', 'J. K. Rowling', '2', 'Corint Junior', 'Fiction', 'Magic world!', 14)
+insert into Book values(9, 'Harry Potter and the chamber of secrets', 'J. K. Rowling', '15', 'Corint Junior', 'Fiction', 'Magic and Wizards!', 22)
+insert into Book values(10, 'Harry Potter and the prisoner of Azkaban', 'J. K. Rowling', '3', 'Corint Junior', 'Fiction', 'Magic world!', 32)
+insert into Book values(11, 'Divergent', 'Veronica Roth', '12', 'Arthur', 'Fiction', 'War and Love', 123)
+insert into Book values(12, 'Divergent', 'Veronica Roth', '12', 'Arthur', 'Fiction', 'War and Love', 123)
+insert into Book values(13, 'Harry Potter and Deathly Hallows', 'J. K. Rowling', '12', 'Arthur', 'Fiction', 'Magical!', 200)
+insert into Book values(14, 'Harry Potter and the philosopher stone', 'J. K. Rowling', '13', 'Arthur', 'Fiction', 'Magical and family!', 124)
+SELECT * from Book
+
+
+--- populating the person table ---
+insert into Person values(1, 'Pop Ana', 24)
+insert into Person values(2, 'Orza Andreea', 20)
+insert into Person values(3, 'Semeniuc Laura', 30)
+insert into Person values(4, 'Orza Adrian', 27)
+insert into Person values(5, 'Ples Ovidiu', 17)
+insert into Person values(6, 'Pop Gabriel', 15)
+insert into Person values(7, 'Marza Adriana', 22)
+insert into Person values(8, 'Man Renata', 18)
+insert into Person values(9, 'Pop Carina', 21)
+insert into Person values(10, 'Suciu Carmen', 14)
+insert into Person values(11, 'Fetico Camelia', 25)
+insert into Person values(12, 'Cosma Ioana', 26)
+insert into Person values(13, 'Onisa Antonela', 25)
+insert into Person values(14, 'Pop Gabriela', 24)
+insert into Person values(15, 'Suciu Anastasia', 20)
+SELECT * from Person
+
+
+--- populating the critic table ---
+insert into Critic values(1, 6)
+insert into Critic values(3, 25)
+insert into Critic values(12, 0)
+SELECT * from Critic
+
+
+insert into Review values(1, 1, 'Harry Potter and the chamber of secrets', 'J. K. Rowling','Best seller!', 10)
+insert into Review values(2, 3, 'Percy Jackson and the olympians', 'Rick Riordan', 'Amazing book!', 9)
+insert into Review values(10, 3, 'Harry Potter and the prisoner of Azkaban', 'J. K. Rowling', 'Very interesting!', 7)
+insert into Review values(3, 12, 'Eleanor & Park', 'Rainbow Rowell', 'Very Romantic!', 8)
+insert into Review values(9, 12, 'Harry Potter and the chamber of secrets', 'J. K. Rowling', 'The best!', 10)
+insert into Review values(3, 1, 'Eleanor & Park', 'Rainbow Rowell', 'Too romantic and boring!', 5)
+SELECT * from Review
+
+--- populating the subscriber table ---
+insert into Subscriber values(2, 30, 'Hunger Games 1', 'Suzanne Collins')
+insert into Subscriber(CNP, Nr_Of_Rented_Books) values(5, 10)
+insert into Subscriber values(4, 15, 'Hobbit', 'J. R. R. Tolkien')
+insert into Subscriber(CNP, Nr_Of_Rented_Books, Favorite_Author) values(6, 10, 'J. K. Rowling')
+insert into Subscriber(CNP, Nr_Of_Rented_Books, Favorite_Book) values(9, 5, 'Hobbit')
+insert into Subscriber(CNP, Nr_Of_Rented_Books, Favorite_Author) values(10, 3,'Suzanne Collins')
+insert into Subscriber(CNP, Nr_Of_Rented_Books, Favorite_Author)values(15, 6, 'J. K. Rowling')
+SELECT * from Subscriber
+
+--- populating the finished table --- 
+insert into Finished values(1, 6, '2021-08-21')
+insert into Finished(Book_ID, CNP_Sub) values(2, 2)
+insert into Finished(Book_ID, CNP_Sub) values(2, 6)
+insert into Finished values(6, 5, '2021-07-03')
+insert into Finished values(7, 4, '2021-06-23')
+
+--- populating the borrowed table ---
+insert into Borrowed values('2021-07-01', '2021-09-01', 1, 1)
+insert into Borrowed values('2021-08-02', '2021-08-23', 2, 1)
+insert into Borrowed values('2021-07-23', '2021-08-10', 6, 2)
+insert into Borrowed values('2021-05-03', '2021-07-05', 7, 3)
+
+--- populating the subscription table ---
+insert into Subscription values(1, 2, 50, 1)
+insert into Subscription values(2, 5, 30, 0)
+insert into Subscription values(3, 5, 100, 1)
+insert into Subscription values(4, 5, 100, 1)
+insert into Subscription values(3, 6, 100, 1)
+insert into Subscription values(3, 4, 100, 0)
+insert into Subscription values(2, 9, 30, 0)
+insert into Subscription values(1, 10, 50, 1)
+insert into Subscription values(2, 10, 30, 1)
+SELECT * from Subscription
+
+
+--- populationg the staff members table --- 
+insert into Staff_Member values(7, 0743123564, 2, 1020)
+insert into Staff_Member values(8, 0734526174, 1, 1400)
+insert into Staff_Member values(11, 0723756123, 4, 1300)
+insert into Staff_Member values(13, 0745324123, 2, 1000)
+insert into Staff_Member values(14, 0765432564, 4, 1500)
+
+
+--- populating the location table ---
+-- ID, Shelf_ID, Section_ID, Book_ID -- 
+insert into Location values(1, 1, 1, 1)
+insert into Location values(2, 1, 1, 2)
+insert into Location values(3, 1, 2, 3)
+insert into Location values(4, 2, 3, 4)
+
+/* UPDATE STATEMENTS */
+
+-- uses AND, =, <	
+SELECT * from Library -- original table
+
+UPDATE Library
+SET Capacity = 150
+WHERE Nr_Of_Books = 3000 AND Capacity < 3050
+
+SELECT * from Library -- updated table
+
+-- uses OR, LIKE
+SELECT * from Library -- original table
+
+UPDATE Library
+SET Nr_Of_Books = 5000
+WHERE Address = 'Decembrie 1' OR Address LIKE '__E%'
+
+SELECT * from Library -- updated table
+
+
+-- uses is not NULL, AND, IN
+SELECT * from Book --original table
+
+UPDATE Book
+SET Edition = 15
+WHERE Description is not NULL AND ID IN (1,2,4,5,6)
+
+SELECT * from Book -- updated table
+
+
+-- uses BETWEEN
+SELECT * from Subscriber -- original table
+
+UPDATE Subscriber
+SET Nr_Of_Rented_Books = 0
+WHERE Nr_Of_Rented_Books BETWEEN 3 AND 5
+
+SELECT * from Subscriber -- updated table
+
+
+/*DELETE STATEMENTS*/
+
+
+-- uses <, AND
+SELECT * from Library -- original table
+
+DELETE 
+From Library
+WHERE Capacity < 500 AND Nr_Of_Books < 150
+
+SELECT * from Library -- updated table
+
+
+--uses IN
+SELECT * from Book -- original table
+
+DELETE 
+From Book
+WHERE Edition IN ('1', '2')
+
+SELECT * from Book -- updated table
+
+
+/*QUERIES*/
+
+-- one query using the UNION operation
+-- Select all books title for which the author is J. K. Rowling or Suzanne Collins
+SELECT * from Book
+
+SELECT Title
+FROM Book as B
+WHERE B.Author Like 'J. K. Rowling'
+UNION
+SELECT Title
+FROM Book as B
+WHERE B.Author Like 'Suzanne Collins'
+
+-- one query using the OR operation
+-- Select all books title, edition and publisher for which the author is J. K. Rowling or Suzanne Collins
+-- condition with OR in the WHERE clause
+-- using DISTINCT
+SELECT * from Book
+
+SELECT DISTINCT Title, Edition, Publisher
+From Book
+WHERE Author = 'J. K. Rowling' OR Author = 'Suzanne Collins'
+
+
+-- one query using the INTERSECT operation
+-- select all the critics which have been working for more than 5 years and reviewd a J. K. Rowling's book ---> these are considered to be senior critics with the most experience
+SELECT C.CNP
+FROM Critic as C
+WHERE C.Nr_Of_Age_Working >= 5
+INTERSECT
+SELECT R.CNP
+FROM Review as R
+WHERE R.Book_Author = 'J. K. Rowling'
+
+
+-- one query using the IN opertion
+-- select all the libraries with subscription price greater than 30$  ---> this is orientative for the people in order to choose a cheaper library
+SELECT L.ID
+FROM Library as L
+WHERE L.ID IN
+	(SELECT S.Library_ID
+	FROM Subscription as S
+	WHERE S.Price > 30)
+
+
+-- one query using the EXCEPT operation
+-- select all subscribers which have a favorite author but does not have a favorite book
+-- condition with AND operator
+SELECT * FROM Subscriber
+SELECT * FROM Person
+SELECT P.Name
+FROM Subscriber as S, Person as P
+WHERE S.Favorite_Author is not NULL AND S.CNP = P.CNP
+EXCEPT
+SELECT P.Name
+FROM Subscriber as S, Person as P
+WHERE S.Favorite_Book is not NULL AND S.CNP = P.CNP
+
+
+-- one query using the NOT IN operation
+-- select all the books which are from fiction category but have not been reviewed by any critic yet, eliminating the duplicates and decreasing their popularity by 1
+-- condition with NOT and AND in where clause
+-- ARITHMETIC OPERATION in the Select clause
+-- using DISTINCT
+SELECT * from Review
+SELECT * from Book
+SELECT DISTINCT TOP 2 B.Title, B.Popularity - 1 as DecreasedPopularity
+FROM Book as B
+WHERE B.Category = 'Fiction' AND B.Title NOT IN
+	(SELECT R.Book_Title
+	FROM Review as R)
+	
+
+-- 2 queries with IN operator and a subquery in the WHERE clause
+-- Select the top 3 staff members from libraries with a capacity greater than 1000 and multiply their salary by 2 due to pandemic situation, order by the incresed salary descendingly
+-- ARITHMETIC OPERATION in the Select clause
+-- using TOP
+SELECT * FROM Library
+SELECT TOP 3 S.CNP, S.Salary*2 as IncreasedSalary
+FROM Staff_Member as S
+WHERE S.Library_ID IN
+	(SELECT L.ID
+	FROM Library as L
+	WHERE L.Capacity > 1000
+	)
+ORDER BY IncreasedSalary DESC
+
+
+-- Select all the persons which are critics and which reviewed at least a book from the battle category
+
+SELECT P.Name,P.CNP
+FROM Person as P
+WHERE P.CNP IN
+	(SELECT C.CNP
+	FROM Critic as C
+	WHERE C.CNP IN
+		(SELECT R.CNP
+		FROM Review as R
+		WHERE R.Book_ID IN
+			(SELECT B.ID
+			FROM Book as B
+			WHERE B.Category = 'Battle'
+			)
+		)
+	)
+
+
+-- 4 queries with INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL JOIN --
+
+-- one query with LEFT JOIN --
+-- Select all subscriber's name that have a subscription with Library 2
+
+SELECT P.Name, Sub.Availability, Sub.Library_ID
+FROM Person P INNER JOIN Subscriber as S
+	ON P.CNP = S.CNP
+	LEFT JOIN Subscription as Sub
+		ON S.CNP = Sub.CNP_Sub
+			WHERE Sub.Library_ID = 2
+
+
+-- one query with INNER JOIN and 2 many to many relationships
+-- Select all Subscribers CNPs with the book title, finished date, due date and library id ( It shows us every person who borrowed a book and when and where it has to be returned)
+SELECT P.Name, B.Title, F.Date_Finished, Bor.Due_Date, L.ID
+FROM Person P INNER JOIN Subscriber S
+	ON P.CNP = S.CNP
+		INNER JOIN Finished F
+		ON S.CNP = F.CNP_Sub
+			INNER JOIN Book B
+			ON F.Book_ID = B.ID
+				INNER JOIN Borrowed Bor
+				on B.ID = Bor.Book_ID
+					INNER JOIN Library L
+					on Bor.Library_ID = L.ID
+
+
+-- one query with FULL JOIN and 3 joined tables
+-- Select all the Books and Critics and Review Idea if there is one
+SELECT * FROM Review
+SELECT P.Name, B.Title, R.Ideea
+FROM Person P INNER JOIN Critic C
+	ON P.CNP = C.CNP
+		FULL JOIN Review R
+		ON C.CNP = R.CNP
+			FULL JOIN Book B
+				ON R.Book_ID = B.ID
+
+
+-- one query with RIGHT JOIN
+-- Select all the Books and their location if there exists one
+SELECT B.Title, L.ID
+FROM Location L RIGHT JOIN Book B
+	ON L.Book_ID = B.ID
+
+
+-- 2 queries with the EXISTS operator and a subquery in the WHERE clause
+
+-- Select all Subscribers which have an available subscription for any library and decrease their subscription price by 10 for being loyal, ordered ascendingly by library ID
+-- ARITHMETIC OPERATION in the Select clause
+SELECT S.CNP_Sub, S.Price - 10 as NewLoialtyPrice, S.Library_ID
+FROM Subscription as S
+WHERE EXISTS
+	(SELECT *
+	FROM Subscriber as Sub
+	WHERE S.CNP_Sub = Sub.CNP AND S.Availability = 1
+	)
+ORDER BY S.Library_ID
+
+
+--Select all the staff member which work for the library with the ID 1
+SELECT P.Name, S.Library_ID
+FROM Person P INNER JOIN Staff_Member S
+	ON P.CNP = S.CNP
+	WHERE EXISTS
+	(SELECT *
+	FROM Library L
+	WHERE (L.ID = 1) AND (S.Library_ID = 1))
+
+-- 2 queries with a subquery in the FORM clause -- 
+
+-- Select all Books which received reviews from a critic with more than 5 years experience
+SELECT * FROM Book
+SELECT * FROM Critic
+SELECT * FROM Review
+SELECT B.Title, B.Edition
+FROM Book B inner join
+	(SELECT R.Book_ID
+	FROM Review R inner join
+		(SELECT C.CNP
+		FROM Critic C
+		WHERE C.Nr_Of_Age_Working > 5 ) CW
+	ON CW.CNP = R.CNP
+	) RW
+	ON RW.Book_ID = B.ID
+
+
+-- Select all the Books which were finished by the subscribers
+SELECT * FROM Finished
+SELECT B.ID, B.Title, B.Author
+FROM Book B inner join
+	(SELECT F.Book_ID
+	FROM Finished F
+	WHERE F.Date_Finished is not NULL) FQ
+	ON FQ.Book_ID = B.ID
+
+
+-- 4 queries with group by clause
+
+
+--Find all the books which have more than 1 exemplar
+-- uses COUNT and contains THE HAVING CLAUSE with a SUBQUERY
+SELECT B.Title, count(B.Title) as NrOfCopies
+FROM Book B
+GROUP BY B.Title
+HAVING 1 < (SELECT count(*)
+			FROM Book B2
+			WHERE B.Title = B2.Title)
+
+
+-- Find for each author which has at least 2 reviews the average grade of the reviews
+-- uses COUNT, AVG and contains THE HAVING CLAUSE with a SUBQUERY
+SELECT * FROM Book
+SELECT * FROM Review
+SELECT B.Author, AVG(R.Grade) as GradeAverage
+FROM Book B INNER JOIN Review R
+	ON B.ID = R.Book_ID
+GROUP BY B.Author
+HAVING 1 < (SELECT count(*)
+			FROM Review R2
+			WHERE R2.Book_Author = B.Author)
+
+
+-- Find all the books with popularity greater than 0
+-- uses SUM and contains THE HAVING CLAUSE
+SELECT * FROM Book
+SELECT B.Title, sum(B.popularity) as TotalPopularity
+FROM Book B
+Group By B.Title
+HAVING 0 < sum(B.Popularity)
+Order By B.Title
+
+
+-- Find for all the authors which received a review for one of its book the maximum grade ,the mininum grade and the number of received reviews
+-- uses MAX, MIN, COUNT
+SELECT R.Book_Author, MAX(R.Grade) MaximumGradeReceived, MIN(R.Grade) MinimumGradeReceived, count(R.Book_Author) as NumberOfReceivedReviews
+FROM Review R
+GROUP BY R.Book_Author
+
+
+-- 4 queries using ANY and ALL to introduce a subquery in the WHERE clause
+
+-- Using ANY
+-- Find TOP 10 Books from the database which have the popularity greater then the fiction book with the minimum popularity
+SELECT * FROM Book
+
+SELECT TOP 10 B.*
+FROM Book B
+WHERE B.Popularity > ANY
+	(SELECT B2.Popularity
+	FROM Book B2
+	WHERE B2.Category = 'Fiction')
+
+
+-- rewritten with aggregation operator -> from ANY to MIN
+SELECT TOP 10 B.*
+FROM Book B
+WHERE B.Popularity >
+	(SELECT MIN(B2.Popularity)
+	FROM Book B2
+	WHERE B2.Category = 'Fiction')
+
+
+-- Using ALL
+-- Find All the Subscribers from the database for which the number of rented books is greater then the ones of the subscriber with favourite author J. K. Rowling
+SELECT * FROM Subscriber
+
+SELECT S.*
+FROM Subscriber S
+WHERE S.Nr_Of_Rented_Books > ALL
+	(SELECT S2.Nr_Of_Rented_Books
+	FROM Subscriber S2
+	WHERE S2.Favorite_Author = 'J. K. Rowling')
+
+-- rewritten with aggregation operator -> from ANY to MAX
+
+SELECT S.*
+FROM Subscriber S
+WHERE S.Nr_Of_Rented_Books >
+	(SELECT MAX(S2.Nr_Of_Rented_Books)
+	FROM Subscriber S2
+	WHERE S2.Favorite_Author = 'J. K. Rowling')
+
+
+-- Using Any
+-- Find the names of all junior critics ( A critic is junior when its number of worked years is 0 or 1)
+SELECT * FROM Critic
+SELECT * FROM Person
+SELECT P.Name
+FROM Person P
+WHERE P.CNP = ANY
+	(SELECT C.CNP
+	FROM Critic C
+	WHERE C.Nr_Of_Age_Working = 0 OR C.Nr_Of_Age_Working = 1)
+
+
+-- rewritten using IN
+SELECT P.Name
+FROM Person P
+WHERE P.CNP IN
+	(SELECT C.CNP
+	FROM Critic C
+	WHERE C.Nr_Of_Age_Working = 0 OR C.Nr_Of_Age_Working = 1)
+
+
+-- Using ALL
+-- Find the names of all subscribers which do not have a subscription at all for library 2
+SELECT * FROM Subscriber
+SELECT * FROM Subscription
+SELECT P.Name, P.CNP
+FROM Person P INNER JOIN
+	(SELECT S.CNP
+	FROM Subscriber S 
+	WHERE S.CNP <> ALL(
+		(SELECT Sub.CNP_Sub
+		FROM Subscription Sub
+		WHERE (Sub.Availability = 1 OR Sub.Availability = 0) AND Sub.Library_ID = 2))
+	) SW
+	on SW.CNP = P.CNP
+
+
+-- rewritten using NOT IN
+SELECT * FROM Subscriber
+SELECT * FROM Subscription
+SELECT P.Name, P.CNP
+FROM Person P INNER JOIN
+	(SELECT S.CNP
+	FROM Subscriber S 
+	WHERE S.CNP NOT IN(
+		(SELECT Sub.CNP_Sub
+		FROM Subscription Sub
+		WHERE (Sub.Availability = 1 OR Sub.Availability = 0) AND Sub.Library_ID = 2))
+	) SW
+	on SW.CNP = P.CNP
+
+
+
+/*-- Find the average salary for each library
+SELECT L.ID, AVG(S.Salary) as AverageSalary
+FROM Library L INNER JOIN Staff_Member S
+	ON L.ID = S.Library_ID
+GROUP BY L.ID
+HAVING 1 < count(S.CNP)
+
+
+-- Find the total income from subscriptions for each library
+SELECT L.ID, sum(S.Price) as TotalIncome
+FROM Library L INNER JOIN Subscription S
+	ON L.ID = S.Library_ID
+GROUP By L.ID
+
+
+-- Find the book with the max popularity and the book with the min popularity
+SELECT B.Title, MAX(B.Popularity) as MaxPopularity, MIN(B.Popularity) as MinPopularity
+From Book as B
+GROUP By B.Title */
