@@ -1,0 +1,3 @@
+
+
+(PI {P.P2, Q.Q2, R.R3} ( ( (PI {P.P2, P.PID} ( sigma(P.P3='Bilbo') (P) ) ) INNER JOIN ON P.PID = Q.QI (PI {Q.QID, Q.Q2, Q.Qi} ( sigma (Q.Q5=100) (Q) ) ) ) INNER JOIN ON Q.QID = R.R2 ( (PI {R.R2, R.R3} ( sigma (R.R1 = 7) (R) ) ) ) ) )
